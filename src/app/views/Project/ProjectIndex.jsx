@@ -2,7 +2,6 @@ import React, {useEffect} from "react";
 import {makeStyles} from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import AddCircleOutlineOutlinedIcon from "@material-ui/icons/AddCircleOutlineOutlined";
-import CountryForm from "./CountryForm";
 import SearchIcon from "@material-ui/icons/Search";
 import InputBase from "@material-ui/core/InputBase";
 import {observer} from "mobx-react";
@@ -10,9 +9,10 @@ import {useStore} from "../../stores";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import TableCustom from "../../common/BuiHien/TableCustom";
 import IconButton from "@material-ui/core/IconButton";
 import {Icon} from "@material-ui/core";
-import TableCustom from "../../common/BuiHien/TableCustom";
+import ProjectForm from "./ProjectForm";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -78,44 +78,44 @@ const MaterialButton = ({item, setSelected, onEdit, onDelete}) => (<>
         <Icon color="error">delete</Icon>
     </IconButton>
 </>);
-export default observer(function CountryIndex() {
-    const {countryStore} = useStore();
+export default observer(function StaffIndex() {
+    const {projectStore} = useStore();
     const {
         search,
         updatePageData,
         setKeyword,
         keyword,
         setShouldOpenEditorDialog,
-        setSelectedCountry,
-        countryList,
+        setSelected,
+        listData,
         setShouldOpenConfirmationDialog,
         rowsPerPage,
         setRowsPerPage,
         totalPages,
         page,
         handleChangePage,
-        selectedCountry,
-        shouldOpenEditorDialog,
-        updateCountry,
-        saveCountry,
         shouldOpenConfirmationDialog,
-        handleConfirmDelete
-    } = countryStore;
+        handleConfirmDelete,
+        shouldOpenEditorDialog
+    } = projectStore;
+
     useEffect(() => {
         search();
-    }, []);
+    }, [search]);
 
     const classes = useStyles();
 
     const handleIconClick = () => {
         updatePageData(keyword);
     };
+
     const handleKeyDown = (e) => {
         setKeyword(e.target.value);
         if (e.key === "Enter") {
             updatePageData(keyword);
         }
     };
+
     const columns = [
         {
             title: 'STT', render: (rowData) => rowData.tableData.id + 1,
@@ -126,14 +126,14 @@ export default observer(function CountryIndex() {
                 paddingLeft: "10px",
             }
         },
-        {title: 'Mã quốc gia', field: 'code'},
-        {title: 'Tên quốc gia', field: 'name'},
-        {title: 'Mô tả', field: 'description'}, {
+        {title: 'Mã dự án', field: 'code'},
+        {title: 'Tên dự án', field: 'name'},
+        {title: 'Mô tả dự án', field: 'description'}, {
             title: "Hành động", render: (rowData) => (<MaterialButton
                 item={rowData}
                 onEdit={setShouldOpenEditorDialog}
                 onDelete={setShouldOpenConfirmationDialog}
-                setSelected={setSelectedCountry}
+                setSelected={setSelected}
             />),
         },]
 
@@ -146,7 +146,7 @@ export default observer(function CountryIndex() {
                     className={classes.button}
                     onClick={() => {
                         setShouldOpenEditorDialog(true)
-                        setSelectedCountry(null)
+                        setSelected(null)
 
                     }}
                 >
@@ -174,17 +174,11 @@ export default observer(function CountryIndex() {
                     totalPages={totalPages}
                     page={page}
                     handleChangePage={handleChangePage}
-                    title={"Danh sách quốc gia"}
-                    datas={countryList}
+                    title={"Danh sách dự án"}
+                    datas={listData}
                     columns={columns}/>
             </div>
-            <CountryForm
-                data={selectedCountry}
-                isOpen={shouldOpenEditorDialog}
-                setClose={setShouldOpenEditorDialog}
-                updateCountry={updateCountry}
-                createCountry={saveCountry}
-            />
+            {shouldOpenEditorDialog && <ProjectForm/>}
             {shouldOpenConfirmationDialog && (<Dialog
                 open={shouldOpenConfirmationDialog}
                 onClose={() => setShouldOpenConfirmationDialog(false)}

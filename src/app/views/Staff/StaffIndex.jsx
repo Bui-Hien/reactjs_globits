@@ -9,10 +9,12 @@ import {useStore} from "../../stores";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import DepartmentForm from "./DepartmentForm";
 import TableCustom from "../../common/BuiHien/TableCustom";
 import IconButton from "@material-ui/core/IconButton";
 import {Icon} from "@material-ui/core";
+import DepartmentForm from "../Department/DepartmentForm";
+import StaffForm from "./StaffForm";
+import MenuItem from "@material-ui/core/MenuItem";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -76,6 +78,9 @@ const useStyles = makeStyles((theme) => ({
         justifyContent: "space-between",
         marginBottom: theme.spacing(2),
     },
+    tableContainer: {
+        overflowY: 'auto', // Enables vertical scrolling
+    },
 }));
 
 const MaterialButton = ({item, setSelected, onEdit, onDelete}) => (
@@ -95,17 +100,16 @@ const MaterialButton = ({item, setSelected, onEdit, onDelete}) => (
         </IconButton>
     </>
 );
-
-export default observer(function DepartmentIndex() {
-    const {departmentStore} = useStore();
+export default observer(function StaffIndex() {
+    const {staffStore} = useStore();
     const {
         search,
         updatePageData,
         setKeyword,
         keyword,
         setShouldOpenEditorDialog,
-        setSelectedDepartment,
-        departmentList,
+        setSelected,
+        listData,
         setShouldOpenConfirmationDialog,
         rowsPerPage,
         setRowsPerPage,
@@ -114,8 +118,8 @@ export default observer(function DepartmentIndex() {
         handleChangePage,
         shouldOpenConfirmationDialog,
         handleConfirmDelete,
-        setSelectedList
-    } = departmentStore;
+        shouldOpenEditorDialog
+    } = staffStore;
 
     useEffect(() => {
         search();
@@ -154,22 +158,50 @@ export default observer(function DepartmentIndex() {
 
     const columns = [
         {
-            title: 'Phòng ban trực thuộc',
-            render: (rowData) => rowData?.parent?.name ? rowData?.parent?.name : "Không có"
-
+            title: 'STT', render: (rowData) => rowData.tableData.id + 1,
         },
-        {title: 'Tên Phòng ban', field: 'name'},
-        {title: 'Mã phòng ban', field: 'code'},
-        {title: 'Mô tả', field: 'description'},
-        {title: 'Chức năng', field: 'func'},
-        {title: 'Industry Block', field: 'industryBlock'},
-        {title: 'Số thành lập', field: 'foundedNumber'},
+        {title: 'Họ', field: 'firstName'},
+        {title: 'Tên', field: 'lastName'},
+        {title: 'Họ và Tên', field: 'displayName', render: (rowData) => rowData?.firstName + " " + rowData?.lastName},
         {
-            title: 'Ngày thành lập',
-            field: 'foundedDate',
-            render: rowData => formatDateTime(rowData.foundedDate, false)
+            title: 'Giới tính',
+            field: 'gender',
+            render: (rowData) => {
+                // Render the gender as text
+                let genderText;
+                switch (rowData?.gender) {
+                    case 'F':
+                        genderText = 'Female';
+                        break;
+                    case 'M':
+                        genderText = 'Male';
+                        break;
+                    case 'U':
+                        genderText = 'Unknown';
+                        break;
+                    default:
+                        genderText = 'Not specified';
+                }
+                return genderText;
+            },
         },
-        {title: 'Display Order', field: 'displayOrder'},
+        {
+            title: 'Ngày sinh',
+            field: 'birthDate',
+            render: rowData => formatDateTime(rowData?.birthDate, false)
+        },
+        {title: 'Nơi sinh', field: 'birthPlace'},
+        {
+            title: 'Địa chỉ thường trú', field: 'permanentResidence',
+        },
+        {title: 'Nơi cư trú hiện tại', field: 'currentResidence'},
+        {title: 'Email', field: 'email'},
+        {title: 'Số điện thoại', field: 'phoneNumber'},
+        {title: 'CCCD', field: 'idNumber'},
+        {title: 'Quốc tịch', field: 'nationality', render: (rowData) => rowData?.nationality?.name},
+        // {title: 'Dân tộc', field: 'ethnics'},
+        // {title: 'Tôn giáo', field: 'religion'},
+        {title: 'Phòng ban', field: 'department', render: (rowData) => rowData?.department?.name},
         {
             title: "Hành động",
             render: (rowData) => (
@@ -177,7 +209,7 @@ export default observer(function DepartmentIndex() {
                     item={rowData}
                     onEdit={setShouldOpenEditorDialog}
                     onDelete={setShouldOpenConfirmationDialog}
-                    setSelected={setSelectedDepartment}
+                    setSelected={setSelected}
                 />
             ),
         },
@@ -193,7 +225,7 @@ export default observer(function DepartmentIndex() {
                     className={classes.button}
                     onClick={() => {
                         setShouldOpenEditorDialog(true);
-                        setSelectedDepartment(null);
+                        setSelected(null);
                     }}
                 >
                     Thêm mới <AddCircleOutlineOutlinedIcon/>
@@ -213,19 +245,19 @@ export default observer(function DepartmentIndex() {
                     </div>
                 </div>
             </div>
-            <TableCustom
-                rowsPerPage={rowsPerPage}
-                setRowsPerPage={setRowsPerPage}
-                totalPages={totalPages}
-                page={page}
-                handleChangePage={handleChangePage}
-                title={"Danh sách phòng ban"}
-                datas={departmentList}
-                columns={columns}
-                checkbox={true}
-                setSelectedList={setSelectedList}
-            />
-            <DepartmentForm/>
+            <div className={classes.tableContainer}>
+                <TableCustom
+                    rowsPerPage={rowsPerPage}
+                    setRowsPerPage={setRowsPerPage}
+                    totalPages={totalPages}
+                    page={page}
+                    handleChangePage={handleChangePage}
+                    title={"Danh sách nhân viên"}
+                    datas={listData}
+                    columns={columns}/>
+            </div>
+            {shouldOpenEditorDialog && <StaffForm/>}
+
             {shouldOpenConfirmationDialog && (
                 <Dialog
                     open={shouldOpenConfirmationDialog}
@@ -246,4 +278,5 @@ export default observer(function DepartmentIndex() {
             )}
         </div>
     );
-});
+})
+;

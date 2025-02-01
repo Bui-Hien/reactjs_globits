@@ -24,7 +24,7 @@ export default class CountryStore {
         this.loadingInitial = state;
     };
 
-    setKeyword(value) {
+    setKeyword = (value) => {
         this.keyword = value;  // Cập nhật 'keyword' trong store
     }
 
@@ -52,14 +52,15 @@ export default class CountryStore {
         }
     };
 
-    setShouldOpenConfirmationDialog(state) {
+    setShouldOpenConfirmationDialog = (state) => {
         this.shouldOpenConfirmationDialog = state;
     }
 
-    setShouldOpenEditorDialog = (state)=> {
+    setShouldOpenEditorDialog = (state) => {
         console.log(this)
         this.shouldOpenEditorDialog = state;
     }
+
 
     handleClose() {
         this.shouldOpenEditorDialog = false;
@@ -87,7 +88,11 @@ export default class CountryStore {
         this.page = 1;
         this.updatePageData();
     };
-
+    setPageSize = (values) => {
+        this.rowsPerPage = Number(values);
+        this.page = 1;
+        this.updatePageData();
+    }
     handleChangePage = (event, newPage) => {
         this.setPage(newPage);
     };
